@@ -25,16 +25,20 @@ def register():
 			'SELECT id FROM user WHERE username=?',(username,)
 			).fetchone() is not None:
 				error='User {} is already registered.'.format(username)
+			# 用了format()函数，百度"format,python"
 		if error is None:
 			db.execute(
 				'INSERT INTO user (username,password) VALUES (?,?)',
 				(username,generate_password_hash(password))
 			)
-			#问号是占位符
+			#通过generate_password_hash只保存密码的hash值
 			db.commit()
 			return redirect(url_for('auth.login'))
-			#这里出现了redirect！
+			#重定向到url_for生成的url
+			#噢...原来之前误解了urlfor的作用，这个函数是根据参数返回一个url
+			#所以这里呢就是返回了auth.login的地址，然后redirect过去！明白了
 		flash(error)
+		#使用flash保留错误记录
 	return render_template('auth/register.html')
 
 @bp.route('/login',methods=('GET','POST'))
@@ -57,12 +61,12 @@ def login():
 			session['user_id']=user['id']
 			return redirect(url_for('index'))
 		flash(error)
-		#session是一个dict用于储存横跨请求的值。
+		#session是一个dict，用于储存横跨请求的值。
 		#当验证成功后，用户的id被储存于一个新的会话中
 		#会话数据被储存到一个向浏览器发送的 cookie 中，在后继请求中，浏览器会返回它
 	return render_template('auth/login.html')
 
-#这个beforeRequest会在试图函数之前运行，作用是检查用户id是否在session中
+#这个beforeRequest会在视图函数之前运行，作用是检查用户id是否在session中，并赋g.user值
 @bp.before_app_request
 def load_logged_in_user():
 	user_id=session.get('user_id')
@@ -79,7 +83,7 @@ def logout():
 	session.clear()
 	return redirect(url_for('index'))
 
-#在其他试图中的验证功能，使用装饰器，what's that?
+#在其他试图中的验证功能，使用'装饰器'，what's that?
 def login_required(view):
 	@functools.wraps(view)
 	def wrapped_view(**kwargs):
