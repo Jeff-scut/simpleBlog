@@ -37,5 +37,7 @@ def create_app(test_config=None):
 	app.register_blueprint(blog.bp)
 	app.add_url_rule('/',endpoint='index')
 	#上面两个是蓝图的注册
+	#原本index视图的端点是blog.index，这样加了规则之后，url_for('index')就会有跟url_for('blog.index')一样的效果
+
 
 	return app
