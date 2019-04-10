@@ -17,10 +17,14 @@ def index():
 		' ORDER BY created DESC'
 	).fetchall()
 	return render_template('blog/index.html',posts=posts)
+	#render_template可以带参数，这就把信息传到模板了
+
+#在html中，也可以通过urlfor构造链接，还有别的{{}}控制语句等等，详情不展开
+#写在这里是因为在html中写注释怪怪的...
 
 @bp.route('/create',methods=('GET','POST'))
 @login_required
-#这里用了loginRequired这个装饰器之后，就必须在登录状态才能使用试图
+#这里用了loginRequired这个装饰器之后，就必须在登录状态才能使用本视图
 def create():
 	if request.method=='POST':
 		title=request.form['title']
@@ -40,6 +44,8 @@ def create():
 			return redirect(url_for('blog.index'))
 
 	return render_template('blog/create.html')
+	#嗯？在create.html中，{{request.form['body']}}这样的东西是什么操作？
+	#试了一下把那两个东西删掉，没有影响...
 
 #这个是通过id获取一个post，update和delete的时候都要用到，
 #可以检查作者与登录用户是否一致，独立为一个函数是为了减少代码重复？
@@ -81,6 +87,7 @@ def update(id):
 			db.commit()
 			return redirect(url_for('blog.index'))
 	return render_template('blog/update.html',post=post)
+	#这个update.html更骚了，第13行还可以{{xxx or xxx}}的
 
 @bp.route('/<int:id>/delete',methods=('POST',))
 @login_required
